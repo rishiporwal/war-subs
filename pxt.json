@@ -1,0 +1,45 @@
+{
+    "name": "War Subs",
+    "description": "",
+    "dependencies": {
+        "device": "*",
+        "animation": "*",
+        "Color Fading": "github:jwunderl/pxt-color#v0.1.3"
+    },
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md",
+        "tilemap.g.jres",
+        "tilemap.g.ts"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "targetVersions": {
+        "target": "1.2.9",
+        "targetId": "arcade"
+    },
+    "supportedTargets": [
+        "arcade"
+    ],
+    "preferredEditor": "tsprj",
+    "palette": [
+        "#000000",
+        "#0C0C4C",
+        "#2C466E",
+        "#245296",
+        "#2E65B8",
+        "#327CEA",
+        "#F7F61A",
+        "#D1D014",
+        "#474747",
+        "#262626",
+        "#919019",
+        "#82811E",
+        "#373737",
+        "#242424",
+        "#121212",
+        "#000000"
+    ]
+}
