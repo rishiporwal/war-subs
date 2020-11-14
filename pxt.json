@@ -5,7 +5,8 @@
         "device": "*",
         "animation": "*",
         "Color Fading": "github:jwunderl/pxt-color#v0.1.3",
-        "pxt-arcade-image-transform": "github:robo-technical-group/pxt-arcade-image-transform#v1.0.8"
+        "pxt-arcade-image-transform": "github:robo-technical-group/pxt-arcade-image-transform#v1.0.8",
+        "arcade-text": "github:microsoft/arcade-text#v1.3.0"
     },
     "files": [
         "main.blocks",
