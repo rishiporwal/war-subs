@@ -89,6 +89,56 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     SubEditor.setFlag(SpriteFlag.Invisible, true)
 })
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (CursorPosition == "B") {
+        if (SelectedObjectBase == 0) {
+            SelectedObjectBase = 9
+        } else {
+            SelectedObjectBase += -1
+        }
+        PlayerBase.setImage(Bases[SelectedObjectBase])
+    } else if (CursorPosition == "C") {
+        if (SelectedObjectCannon == 0) {
+            SelectedObjectCannon = 9
+        } else {
+            SelectedObjectCannon += -1
+        }
+        PlayerCannon.setImage(Cannons[SelectedObjectCannon])
+        PlayerCannon.image.replace(7, 4)
+    } else {
+        if (SelectedObjectPropeller == 0) {
+            SelectedObjectPropeller = 9
+        } else {
+            SelectedObjectPropeller += -1
+        }
+        PlayerPropellerDisplay.setImage(transformSprites.scale2x(Propellers[SelectedObjectPropeller]))
+    }
+})
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (CursorPosition == "B") {
+        if (SelectedObjectBase == 9) {
+            SelectedObjectBase = 0
+        } else {
+            SelectedObjectBase += 1
+        }
+        PlayerBase.setImage(Bases[SelectedObjectBase])
+    } else if (CursorPosition == "C") {
+        if (SelectedObjectCannon == 9) {
+            SelectedObjectCannon = 0
+        } else {
+            SelectedObjectCannon += 1
+        }
+        PlayerCannon.setImage(Cannons[SelectedObjectCannon])
+        PlayerCannon.image.replace(7, 4)
+    } else {
+        if (SelectedObjectPropeller == 9) {
+            SelectedObjectPropeller = 0
+        } else {
+            SelectedObjectPropeller += 1
+        }
+        PlayerPropellerDisplay.setImage(transformSprites.scale2x(Propellers[SelectedObjectPropeller]))
+    }
+})
 function MakeArrays () {
     Cannons = [
     img`
@@ -474,38 +524,6 @@ function MakeArrays () {
         ......................7777777...........
         `,
     img`
-        ................9.......................
-        ..............999.......................
-        ...............9........................
-        ...............9........................
-        ...............8........................
-        .............9.8........................
-        .............9.8........................
-        .............8.9........................
-        .............8.9.....88898999...........
-        .............9.9......8....9............
-        .............9.9.....aaaaaaaababab......
-        ...........999999..bababababababab......
-        ............9889..aaaaaaaaaaaa..........
-        ............9889.babababababab..........
-        .7......66669999aaaaaaaaaaaaaaa.........
-        .777777777779779a7a7a7a6a6a6a6a.88......
-        ..67..76666697696a6a7a7a6a6a6a6a688.....
-        .67....69699999999969699999696966989999.
-        666....697776666666666966696669668899899
-        676....696999999999699997999969679899989
-        767....797989888989798896988979768899999
-        676....696989888989698897988969679899999
-        777....797999999999799997999979778899999
-        .77....79777779777777977777777977889999.
-        ..77..779799979777997779999997977889999.
-        .77777777777777779889777777777977889999.
-        .7......777777977988977999999797788999..
-        ...........77777779977777777777778899...
-        ...............77777777999997777788.....
-        ......................7777777...........
-        `,
-    img`
         .................9......................
         .................8......................
         .................9......................
@@ -536,6 +554,38 @@ function MakeArrays () {
         ...........67676767677777776767678899...
         ...............76777777777676767688.....
         ......................7676767...........
+        `,
+    img`
+        ................9.......................
+        ..............999.......................
+        ...............9........................
+        ...............9........................
+        ...............8........................
+        .............9.8........................
+        .............9.8........................
+        .............8.9........................
+        .............8.9.....88898999...........
+        .............9.9......8....9............
+        .............9.9.....aaaaaaaababab......
+        ...........999999..bababababababab......
+        ............9889..babababababa..........
+        ............9889.babababababab..........
+        .7......66669999aaaaaaaaaaaaaaa.........
+        .777777777779779a7a7a7a6a6a6a6a.88......
+        ..67..76666697696a6a7a7a6a6a6a6a688.....
+        .67....69699999999969699999696966989999.
+        666....697776666666666966696669668899899
+        676....696999999999699997999969679899989
+        767....797989888989798896988979768899999
+        676....696989888989698897988969679899999
+        777....797999999999799997999979778899999
+        .77....79777779777777977777777977889999.
+        ..77..779799979777997779999997977889999.
+        .77777777777777779889777777777977889999.
+        .7......777777977988977999999797788999..
+        ...........77777779977777777777778899...
+        ...............77777777999997777788.....
+        ......................7777777...........
         `
     ]
     Propellers = [
@@ -577,11 +627,11 @@ function MakeArrays () {
         `,
     img`
         . . . . 
-        . 8 9 . 
-        . 9 8 . 
-        . 8 9 . 
-        . 9 8 . 
-        . 8 9 . 
+        . 8 8 . 
+        . . 8 . 
+        9 9 8 9 
+        . . 8 . 
+        . 8 8 . 
         . . . . 
         `,
     img`
@@ -592,15 +642,6 @@ function MakeArrays () {
         . . 8 . 
         . 8 8 . 
         . 8 . . 
-        `,
-    img`
-        . . . . 
-        . 8 8 . 
-        . . 8 . 
-        9 9 8 9 
-        . . 8 . 
-        . 8 8 . 
-        . . . . 
         `,
     img`
         6 7 7 7 
@@ -628,6 +669,15 @@ function MakeArrays () {
         7 . 7 7 
         . . . . 
         7 7 . 7 
+        `,
+    img`
+        . . . . 
+        . 8 9 . 
+        . 8 9 . 
+        . 9 8 . 
+        . 8 9 . 
+        . 8 9 . 
+        . . . . 
         `
     ]
 }
@@ -722,15 +772,21 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
 let cannonNames2: string[] = []
 let CannonNames1: string[] = []
 let Cursor: Sprite = null
+let PlayerPropellerDisplay: Sprite = null
 let Cannons: Image[] = []
+let PlayerCannon: Sprite = null
 let Propellers: Image[] = []
 let Bases: Image[] = []
+let PlayerBase: Sprite = null
 let SubEditor: Sprite = null
+let SelectedObjectPropeller = 0
+let SelectedObjectBase = 0
+let SelectedObjectCannon = 0
 let CursorPosition = ""
 CursorPosition = "B"
-let SelectedObjectCannon = randint(0, 9)
-let SelectedObjectBase = randint(0, 9)
-let SelectedObjectPropeller = randint(0, 9)
+SelectedObjectCannon = 0
+SelectedObjectBase = 0
+SelectedObjectPropeller = 0
 MakeArrays()
 SubEditor = sprites.create(img`
     2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
@@ -977,10 +1033,10 @@ scene.setBackgroundImage(img`
     1111111111111111111111111111113333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333111111111111111111111
     1111111111111111111111111111113333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333111111111111111111111
     `)
-let PlayerBase = sprites.create(Bases[SelectedObjectBase], SpriteKind.Player)
+PlayerBase = sprites.create(Bases[SelectedObjectBase], SpriteKind.Player)
 let PlayerPropeller = sprites.create(Propellers[SelectedObjectPropeller], SpriteKind.Player)
-let PlayerCannon = sprites.create(Cannons[SelectedObjectCannon], SpriteKind.Player)
-let PlayerPropellerDisplay = sprites.create(transformSprites.scale2x(PlayerPropeller.image), SpriteKind.Player)
+PlayerCannon = sprites.create(Cannons[SelectedObjectCannon], SpriteKind.Player)
+PlayerPropellerDisplay = sprites.create(transformSprites.scale2x(PlayerPropeller.image), SpriteKind.Player)
 Cursor = sprites.create(img`
     7777....................................7777
     7666....................................6667
@@ -1018,24 +1074,6 @@ Cursor = sprites.create(img`
     7..........................................7
     7777....................................7777
     6666....................................6666
-    `, SpriteKind.Player)
-let SubDisplay = sprites.create(img`
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
     `, SpriteKind.Player)
 Cursor.setPosition(31, 25)
 PlayerCannon.image.replace(7, 4)
