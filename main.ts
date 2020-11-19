@@ -271,6 +271,9 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         EnemyBase.setFlag(SpriteFlag.Invisible, false)
         PlayerPropeller.setFlag(SpriteFlag.Invisible, false)
         EnemyCannon.setFlag(SpriteFlag.Invisible, false)
+        EnemyPropeller.setFlag(SpriteFlag.Invisible, false)
+        PlayerBase.setPosition(40, 100)
+        EnemyBase.setPosition(120, 20)
     } else {
         if (!(APressed)) {
             APressed = true
@@ -281,11 +284,11 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
                 `, SpriteKind.Projectile)
             projectile.z = 40
             projectile.setPosition(PlayerCannon.x, PlayerCannon.y + 2)
-            projectile.setVelocity(50, 0)
+            projectile.setVelocity(10 + (GetTotal("S") + GetTotal("A")), 0)
             PlayerCannon.setVelocity(-5, 0)
             PlayerPropeller.setVelocity(-5, 0)
             PlayerBase.setVelocity(-5, 0)
-            pause(1000)
+            pause(7 * (122 + -1 * GetTotal("A")))
             APressed = false
         }
     }
@@ -914,9 +917,9 @@ function UpdateStats () {
         PartDefendAmount.setText("D: " + convertToText(PropellerDValue[SelectedObjectPropeller]))
         PartSpeedAmount.setText("S: " + convertToText(PropellerSValue[SelectedObjectPropeller]))
     }
-    AttackAmountLabel.setText("Attack (A): " + convertToText(BaseAValue[SelectedObjectBase] + (CannonAValue[SelectedObjectCannon] + PropellerAValue[SelectedObjectPropeller])))
-    DefenceAmountLabel.setText("Defense (D): " + convertToText(BaseDValue[SelectedObjectBase] + (CannonDValue[SelectedObjectCannon] + PropellerDValue[SelectedObjectPropeller])))
-    SpeedAmountLabel.setText("Speed (S): " + convertToText(BaseSValue[SelectedObjectBase] + (CannonSValue[SelectedObjectCannon] + PropellerSValue[SelectedObjectPropeller])))
+    AttackAmountLabel.setText("Attack (A): " + convertToText(GetTotal("A")))
+    DefenceAmountLabel.setText("Defense (D): " + convertToText(GetTotal("D")))
+    SpeedAmountLabel.setText("Speed (S): " + convertToText(GetTotal("S")))
 }
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
@@ -1046,6 +1049,15 @@ function UpdateSubDisplay () {
     CannonDisplay.image.replace(4, 0)
     PropellerDisplay2.setImage(PlayerPropellerDisplay.image)
 }
+function GetTotal (WhatToGet: string) {
+    if (WhatToGet == "S") {
+        return BaseSValue[SelectedObjectBase] + (CannonSValue[SelectedObjectCannon] + PropellerSValue[SelectedObjectPropeller])
+    } else if (WhatToGet == "A") {
+        return BaseAValue[SelectedObjectBase] + (CannonAValue[SelectedObjectCannon] + PropellerAValue[SelectedObjectPropeller])
+    } else {
+        return BaseDValue[SelectedObjectBase] + (CannonDValue[SelectedObjectCannon] + PropellerDValue[SelectedObjectPropeller])
+    }
+}
 let SubNameLabel: TextSprite = null
 let SpeedAmountLabel: TextSprite = null
 let DefenceAmountLabel: TextSprite = null
@@ -1071,6 +1083,7 @@ let cannonNames2: string[] = []
 let ObjectLabel2: TextSprite = null
 let CannonNames1: string[] = []
 let ObjectLabel1: TextSprite = null
+let EnemyPropeller: Sprite = null
 let EnemyCannon: Sprite = null
 let EnemyBase: Sprite = null
 let PropellerDisplay2: Sprite = null
@@ -1107,6 +1120,9 @@ CursorPosition = "B"
 SelectedObjectCannon = 0
 SelectedObjectBase = 0
 SelectedObjectPropeller = 0
+let CurrentEnemyCannon = randint(0, 9)
+let CurrentEnemyBase = randint(0, 9)
+let CurrentEnemyPropeller = randint(0, 9)
 MakeArraysCannon()
 MakeArraysBase()
 MakeArraysPropeller()
@@ -1434,24 +1450,33 @@ animation.animationPresets(animation.bobbing),
 5010,
 true
 )
-EnemyBase = sprites.create(Bases[randint(0, 9)].clone(), SpriteKind.Enemy)
+EnemyBase = sprites.create(Bases[CurrentEnemyCannon].clone(), SpriteKind.Enemy)
 EnemyBase.setFlag(SpriteFlag.Invisible, true)
 EnemyBase.image.flipX()
 EnemyBase.image.replace(6, 12)
 EnemyBase.image.replace(7, 13)
 EnemyBase.image.replace(10, 14)
 EnemyBase.image.replace(11, 15)
-EnemyCannon = sprites.create(Cannons[randint(0, 9)].clone(), SpriteKind.Enemy)
+EnemyCannon = sprites.create(Cannons[CurrentEnemyBase].clone(), SpriteKind.Enemy)
 EnemyCannon.setFlag(SpriteFlag.Invisible, true)
 EnemyCannon.image.flipX()
 EnemyCannon.image.replace(6, 12)
 EnemyCannon.image.replace(7, 13)
 EnemyCannon.image.replace(10, 14)
 EnemyCannon.image.replace(11, 15)
+EnemyPropeller = sprites.create(Propellers[CurrentEnemyPropeller].clone(), SpriteKind.Enemy)
+EnemyPropeller.setFlag(SpriteFlag.Invisible, true)
+EnemyPropeller.image.flipX()
+EnemyPropeller.image.replace(6, 12)
+EnemyPropeller.image.replace(7, 13)
+EnemyPropeller.image.replace(10, 14)
+EnemyPropeller.image.replace(11, 15)
 game.onUpdate(function () {
     if (!(EditorIsOpen)) {
         PlayerCannon.setPosition(PlayerBase.x + 6, PlayerBase.y + 8)
         PlayerPropeller.setPosition(PlayerBase.x - 15, PlayerBase.y + 6)
+        EnemyCannon.setPosition(EnemyBase.x - 6, EnemyBase.y + 8)
+        EnemyPropeller.setPosition(EnemyBase.x + 15, EnemyBase.y + 6)
     }
 })
 game.onUpdate(function () {
@@ -1460,8 +1485,8 @@ game.onUpdate(function () {
         controller.moveSprite(PlayerPropeller, 0, 0)
         controller.moveSprite(PlayerBase, 0, 0)
     } else {
-        controller.moveSprite(PlayerCannon, 30, 50)
-        controller.moveSprite(PlayerPropeller, 30, 50)
-        controller.moveSprite(PlayerBase, 30, 50)
+        controller.moveSprite(PlayerCannon, 10 + 1.5 * GetTotal("S"), 30 + 1.5 * GetTotal("S"))
+        controller.moveSprite(PlayerPropeller, 10 + 1.5 * GetTotal("S"), 30 + 1.5 * GetTotal("S"))
+        controller.moveSprite(PlayerBase, 10 + 1.5 * GetTotal("S"), 30 + 1.5 * GetTotal("S"))
     }
 })
