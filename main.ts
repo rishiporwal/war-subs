@@ -127,6 +127,42 @@ function MakeArraysPropeller () {
     "Filter",
     "Device"
     ]
+    PropellerAValue = [
+    0,
+    3,
+    3,
+    9,
+    3,
+    5,
+    1,
+    1,
+    1,
+    0
+    ]
+    PropellerDValue = [
+    0,
+    2,
+    5,
+    1,
+    5,
+    3,
+    7,
+    5,
+    3,
+    0
+    ]
+    PropellerSValue = [
+    19,
+    18,
+    18,
+    20,
+    25,
+    25,
+    25,
+    27,
+    29,
+    33
+    ]
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
@@ -234,6 +270,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         )
         EnemyBase.setFlag(SpriteFlag.Invisible, false)
         PlayerPropeller.setFlag(SpriteFlag.Invisible, false)
+        EnemyCannon.setFlag(SpriteFlag.Invisible, false)
     } else {
         if (!(APressed)) {
             APressed = true
@@ -873,8 +910,13 @@ function UpdateStats () {
         PartDefendAmount.setText("D: " + convertToText(CannonDValue[SelectedObjectCannon]))
         PartSpeedAmount.setText("S: " + convertToText(CannonSValue[SelectedObjectCannon]))
     } else {
-    	
+        PartAttackAmount.setText("A: " + convertToText(PropellerAValue[SelectedObjectPropeller]))
+        PartDefendAmount.setText("D: " + convertToText(PropellerDValue[SelectedObjectPropeller]))
+        PartSpeedAmount.setText("S: " + convertToText(PropellerSValue[SelectedObjectPropeller]))
     }
+    AttackAmountLabel.setText("Attack (A): " + convertToText(BaseAValue[SelectedObjectBase] + (CannonAValue[SelectedObjectCannon] + PropellerAValue[SelectedObjectPropeller])))
+    DefenceAmountLabel.setText("Defense (D): " + convertToText(BaseDValue[SelectedObjectBase] + (CannonDValue[SelectedObjectCannon] + PropellerDValue[SelectedObjectPropeller])))
+    SpeedAmountLabel.setText("Speed (S): " + convertToText(BaseSValue[SelectedObjectBase] + (CannonSValue[SelectedObjectCannon] + PropellerSValue[SelectedObjectPropeller])))
 }
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
@@ -974,7 +1016,7 @@ function CreateTextSprites () {
     SubNameLabel = textsprite.create(SubName, 0, 1)
     AttackAmountLabel = textsprite.create("Attack (A): +5", 0, 1)
     DefenceAmountLabel = textsprite.create("Defense (D): +99", 0, 1)
-    AgilityAmountLabel = textsprite.create("Speed (S): +5", 0, 1)
+    SpeedAmountLabel = textsprite.create("Speed (S): +5", 0, 1)
     ObjectLabel1.left = 7
     ObjectLabel2.left = 7
     ObjectLabel1.y = 102
@@ -984,10 +1026,10 @@ function CreateTextSprites () {
     SubNameLabel.y = 109
     AttackAmountLabel.left = 59
     DefenceAmountLabel.left = 58
-    AgilityAmountLabel.left = 59
+    SpeedAmountLabel.left = 59
     AttackAmountLabel.y = 11
     DefenceAmountLabel.y = 19
-    AgilityAmountLabel.y = 27
+    SpeedAmountLabel.y = 27
     PartAttackAmount = textsprite.create("A:")
     PartDefendAmount = textsprite.create("D:")
     PartSpeedAmount = textsprite.create("S:")
@@ -1004,10 +1046,10 @@ function UpdateSubDisplay () {
     CannonDisplay.image.replace(4, 0)
     PropellerDisplay2.setImage(PlayerPropellerDisplay.image)
 }
-let AgilityAmountLabel: TextSprite = null
+let SubNameLabel: TextSprite = null
+let SpeedAmountLabel: TextSprite = null
 let DefenceAmountLabel: TextSprite = null
 let AttackAmountLabel: TextSprite = null
-let SubNameLabel: TextSprite = null
 let PartSpeedAmount: TextSprite = null
 let PartDefendAmount: TextSprite = null
 let PartAttackAmount: TextSprite = null
@@ -1018,6 +1060,9 @@ let BaseSValue: number[] = []
 let BaseDValue: number[] = []
 let BaseAValue: number[] = []
 let projectile: Sprite = null
+let PropellerSValue: number[] = []
+let PropellerDValue: number[] = []
+let PropellerAValue: number[] = []
 let PropellerNames2: string[] = []
 let PropellerNames1: string[] = []
 let BaseNames2: string[] = []
@@ -1026,6 +1071,7 @@ let cannonNames2: string[] = []
 let ObjectLabel2: TextSprite = null
 let CannonNames1: string[] = []
 let ObjectLabel1: TextSprite = null
+let EnemyCannon: Sprite = null
 let EnemyBase: Sprite = null
 let PropellerDisplay2: Sprite = null
 let CannonDisplay: Sprite = null
@@ -1395,6 +1441,13 @@ EnemyBase.image.replace(6, 12)
 EnemyBase.image.replace(7, 13)
 EnemyBase.image.replace(10, 14)
 EnemyBase.image.replace(11, 15)
+EnemyCannon = sprites.create(Cannons[randint(0, 9)].clone(), SpriteKind.Enemy)
+EnemyCannon.setFlag(SpriteFlag.Invisible, true)
+EnemyCannon.image.flipX()
+EnemyCannon.image.replace(6, 12)
+EnemyCannon.image.replace(7, 13)
+EnemyCannon.image.replace(10, 14)
+EnemyCannon.image.replace(11, 15)
 game.onUpdate(function () {
     if (!(EditorIsOpen)) {
         PlayerCannon.setPosition(PlayerBase.x + 6, PlayerBase.y + 8)
