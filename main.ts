@@ -4,14 +4,14 @@ namespace SpriteKind {
 }
 function UpdateTextDisplay () {
     if (CursorPosition == "C") {
-        ObjectLabel1.setText(CannonNames1[SelectedObjectCannon])
-        ObjectLabel2.setText(cannonNames2[SelectedObjectCannon])
+        ObjectLabel1.setText(CannonNames1[OwnedCannons[SelectedObjectCannon]])
+        ObjectLabel2.setText(cannonNames2[OwnedCannons[SelectedObjectCannon]])
     } else if (CursorPosition == "B") {
-        ObjectLabel1.setText(BaseNames1[SelectedObjectBase])
-        ObjectLabel2.setText(BaseNames2[SelectedObjectBase])
+        ObjectLabel1.setText(BaseNames1[OwnedBases[SelectedObjectBase]])
+        ObjectLabel2.setText(BaseNames2[OwnedBases[SelectedObjectBase]])
     } else {
-        ObjectLabel1.setText(PropellerNames1[SelectedObjectPropeller])
-        ObjectLabel2.setText(PropellerNames2[SelectedObjectPropeller])
+        ObjectLabel1.setText(PropellerNames1[OwnedPropellers[SelectedObjectPropeller]])
+        ObjectLabel2.setText(PropellerNames2[OwnedPropellers[SelectedObjectPropeller]])
     }
 }
 function MakeArraysPropeller () {
@@ -167,6 +167,7 @@ function MakeArraysPropeller () {
     29,
     33
     ]
+    OwnedPropellers = [0]
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
@@ -278,6 +279,8 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         EnemyPropeller.setFlag(SpriteFlag.Invisible, false)
         PlayerBase.setPosition(23, 100)
         EnemyBase.setPosition(137, 20)
+        EnemyStatusbar.setFlag(SpriteFlag.Invisible, false)
+        PlayerStatusbar.setFlag(SpriteFlag.Invisible, false)
     } else {
         if (!(APressed)) {
             APressed = true
@@ -299,27 +302,27 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
         if (CursorPosition == "B") {
             if (SelectedObjectBase == 0) {
-                SelectedObjectBase = 9
+                SelectedObjectBase = OwnedBases.length - 1
             } else {
                 SelectedObjectBase += -1
             }
-            PlayerBase.setImage(Bases[SelectedObjectBase])
+            PlayerBase.setImage(Bases[OwnedBases[SelectedObjectBase]])
         } else if (CursorPosition == "C") {
             if (SelectedObjectCannon == 0) {
-                SelectedObjectCannon = 9
+                SelectedObjectCannon = OwnedCannons.length - 1
             } else {
                 SelectedObjectCannon += -1
             }
-            PlayerCannon.setImage(Cannons[SelectedObjectCannon])
+            PlayerCannon.setImage(Cannons[OwnedCannons[SelectedObjectCannon]])
             PlayerCannon.image.replace(7, 4)
         } else {
             if (SelectedObjectPropeller == 0) {
-                SelectedObjectPropeller = 9
+                SelectedObjectPropeller = OwnedPropellers.length - 1
             } else {
                 SelectedObjectPropeller += -1
             }
-            PlayerPropellerDisplay.setImage(transformSprites.scale2x(Propellers[SelectedObjectPropeller]))
-            PlayerPropeller.setImage(Propellers[SelectedObjectPropeller])
+            PlayerPropellerDisplay.setImage(transformSprites.scale2x(Propellers[OwnedPropellers[SelectedObjectPropeller]]))
+            PlayerPropeller.setImage(Propellers[OwnedPropellers[SelectedObjectPropeller]])
         }
         UpdateSubDisplay()
         UpdateTextDisplay()
@@ -709,36 +712,49 @@ function MakeArraysBase () {
     -3,
     13
     ]
+    OwnedBases = [0]
 }
+statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
+    game.reset()
+})
+statusbars.onZero(StatusBarKind.Health, function (status) {
+    game.reset()
+})
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
         if (CursorPosition == "B") {
-            if (SelectedObjectBase == 9) {
+            if (SelectedObjectBase == OwnedBases.length - 1) {
                 SelectedObjectBase = 0
             } else {
                 SelectedObjectBase += 1
             }
-            PlayerBase.setImage(Bases[SelectedObjectBase])
+            PlayerBase.setImage(Bases[OwnedBases[SelectedObjectBase]])
         } else if (CursorPosition == "C") {
-            if (SelectedObjectCannon == 9) {
+            if (SelectedObjectCannon == OwnedCannons.length - 1) {
                 SelectedObjectCannon = 0
             } else {
                 SelectedObjectCannon += 1
             }
-            PlayerCannon.setImage(Cannons[SelectedObjectCannon])
+            PlayerCannon.setImage(Cannons[OwnedCannons[SelectedObjectCannon]])
             PlayerCannon.image.replace(7, 4)
         } else {
-            if (SelectedObjectPropeller == 9) {
+            if (SelectedObjectPropeller == OwnedPropellers.length - 1) {
                 SelectedObjectPropeller = 0
             } else {
                 SelectedObjectPropeller += 1
             }
-            PlayerPropellerDisplay.setImage(transformSprites.scale2x(Propellers[SelectedObjectPropeller]))
-            PlayerPropeller.setImage(Propellers[SelectedObjectPropeller])
+            PlayerPropellerDisplay.setImage(transformSprites.scale2x(Propellers[OwnedPropellers[SelectedObjectPropeller]]))
+            PlayerPropeller.setImage(Propellers[OwnedPropellers[SelectedObjectPropeller]])
         }
         UpdateSubDisplay()
         UpdateTextDisplay()
         UpdateStats()
+    }
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Opponent, function (sprite, otherSprite) {
+    if (Math.percentChance(50 - GetTotalForEnemy("D"))) {
+        sprite.destroy()
+        EnemyStatusbar.value += -5
     }
 })
 function MakeArraysCannon () {
@@ -904,20 +920,21 @@ function MakeArraysCannon () {
     -2,
     -12
     ]
+    OwnedCannons = [0]
 }
 function UpdateStats () {
     if (CursorPosition == "B") {
-        PartAttackAmount.setText("A: " + convertToText(BaseAValue[SelectedObjectBase]))
-        PartDefendAmount.setText("D: " + convertToText(BaseDValue[SelectedObjectBase]))
-        PartSpeedAmount.setText("S: " + convertToText(BaseSValue[SelectedObjectBase]))
+        PartAttackAmount.setText("A: " + convertToText(BaseAValue[OwnedBases[SelectedObjectBase]]))
+        PartDefendAmount.setText("D: " + convertToText(BaseDValue[OwnedBases[SelectedObjectBase]]))
+        PartSpeedAmount.setText("S: " + convertToText(BaseSValue[OwnedBases[SelectedObjectBase]]))
     } else if (CursorPosition == "C") {
-        PartAttackAmount.setText("A: " + convertToText(CannonAValue[SelectedObjectCannon]))
-        PartDefendAmount.setText("D: " + convertToText(CannonDValue[SelectedObjectCannon]))
-        PartSpeedAmount.setText("S: " + convertToText(CannonSValue[SelectedObjectCannon]))
+        PartAttackAmount.setText("A: " + convertToText(CannonAValue[OwnedCannons[SelectedObjectCannon]]))
+        PartDefendAmount.setText("D: " + convertToText(CannonDValue[OwnedCannons[SelectedObjectCannon]]))
+        PartSpeedAmount.setText("S: " + convertToText(CannonSValue[OwnedCannons[SelectedObjectCannon]]))
     } else {
-        PartAttackAmount.setText("A: " + convertToText(PropellerAValue[SelectedObjectPropeller]))
-        PartDefendAmount.setText("D: " + convertToText(PropellerDValue[SelectedObjectPropeller]))
-        PartSpeedAmount.setText("S: " + convertToText(PropellerSValue[SelectedObjectPropeller]))
+        PartAttackAmount.setText("A: " + convertToText(PropellerAValue[OwnedPropellers[SelectedObjectPropeller]]))
+        PartDefendAmount.setText("D: " + convertToText(PropellerDValue[OwnedPropellers[SelectedObjectPropeller]]))
+        PartSpeedAmount.setText("S: " + convertToText(PropellerSValue[OwnedPropellers[SelectedObjectPropeller]]))
     }
     AttackAmountLabel.setText("Attack (A): " + convertToText(GetTotal("A")))
     DefenceAmountLabel.setText("Defense (D): " + convertToText(GetTotal("D")))
@@ -1055,18 +1072,18 @@ function CreateTextSprites () {
     PartSpeedAmount.y = 91
 }
 function UpdateSubDisplay () {
-    BaseDisplay.setImage(transformSprites.scale2x(Bases[SelectedObjectBase]))
-    CannonDisplay.setImage(transformSprites.scale2x(Cannons[SelectedObjectCannon]))
+    BaseDisplay.setImage(transformSprites.scale2x(Bases[OwnedBases[SelectedObjectBase]]))
+    CannonDisplay.setImage(transformSprites.scale2x(Cannons[OwnedCannons[SelectedObjectCannon]]))
     CannonDisplay.image.replace(4, 0)
-    PropellerDisplay2.setImage(PlayerPropellerDisplay.image)
+    PropellerDisplay2.setImage(PlayerPropellerDisplay.image.clone())
 }
 function GetTotal (WhatToGet: string) {
     if (WhatToGet == "S") {
-        return BaseSValue[SelectedObjectBase] + (CannonSValue[SelectedObjectCannon] + PropellerSValue[SelectedObjectPropeller])
+        return BaseSValue[OwnedBases[SelectedObjectBase]] + (CannonSValue[OwnedCannons[SelectedObjectCannon]] + PropellerSValue[OwnedPropellers[SelectedObjectPropeller]])
     } else if (WhatToGet == "A") {
-        return BaseAValue[SelectedObjectBase] + (CannonAValue[SelectedObjectCannon] + PropellerAValue[SelectedObjectPropeller])
+        return BaseAValue[OwnedBases[SelectedObjectBase]] + (CannonAValue[OwnedCannons[SelectedObjectCannon]] + PropellerAValue[OwnedPropellers[SelectedObjectPropeller]])
     } else {
-        return BaseDValue[SelectedObjectBase] + (CannonDValue[SelectedObjectCannon] + PropellerDValue[SelectedObjectPropeller])
+        return BaseDValue[OwnedBases[SelectedObjectBase]] + (CannonDValue[OwnedCannons[SelectedObjectCannon]] + PropellerDValue[OwnedPropellers[SelectedObjectPropeller]])
     }
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -1075,6 +1092,12 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     } else {
         sprite.destroy(effects.fire, 500)
         otherSprite.destroy(effects.disintegrate, 500)
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
+    if (Math.percentChance(100 - GetTotal("D"))) {
+        otherSprite.destroy()
+        PlayerStatusbar.value += -5
     }
 })
 let EnemyTorpedo: Sprite = null
@@ -1097,11 +1120,14 @@ let PropellerSValue: number[] = []
 let PropellerDValue: number[] = []
 let PropellerAValue: number[] = []
 let PropellerNames2: string[] = []
+let OwnedPropellers: number[] = []
 let PropellerNames1: string[] = []
 let BaseNames2: string[] = []
+let OwnedBases: number[] = []
 let BaseNames1: string[] = []
 let cannonNames2: string[] = []
 let ObjectLabel2: TextSprite = null
+let OwnedCannons: number[] = []
 let CannonNames1: string[] = []
 let ObjectLabel1: TextSprite = null
 let EnemyPropeller: Sprite = null
@@ -1110,6 +1136,8 @@ let EnemyBase: Sprite = null
 let PropellerDisplay2: Sprite = null
 let CannonDisplay: Sprite = null
 let BaseDisplay: Sprite = null
+let EnemyStatusbar: StatusBarSprite = null
+let PlayerStatusbar: StatusBarSprite = null
 let Cursor: Sprite = null
 let PlayerPropellerDisplay: Sprite = null
 let Cannons: Image[] = []
@@ -1395,8 +1423,8 @@ scene.setBackgroundImage(img`
     1111111111111111111111111111113333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333111111111111111111111
     `)
 PlayerBase = sprites.create(Bases[SelectedObjectBase].clone(), SpriteKind.Player)
-PlayerPropeller = sprites.create(Propellers[SelectedObjectPropeller].clone(), SpriteKind.Player)
-PlayerCannon = sprites.create(Cannons[SelectedObjectCannon].clone(), SpriteKind.Player)
+PlayerPropeller = sprites.create(Propellers[SelectedObjectPropeller].clone(), SpriteKind.Extra)
+PlayerCannon = sprites.create(Cannons[SelectedObjectCannon].clone(), SpriteKind.Extra)
 PlayerPropellerDisplay = sprites.create(transformSprites.scale2x(PlayerPropeller.image), SpriteKind.Text)
 Cursor = sprites.create(img`
     7777....................................7777
@@ -1448,6 +1476,24 @@ PlayerBase.fx = 2
 PlayerCannon.fx = 2
 PlayerPropeller.fx = 2
 CreateTextSprites()
+PlayerStatusbar = statusbars.create(20, 4, StatusBarKind.Health)
+PlayerStatusbar.setColor(6, 1, 7)
+PlayerStatusbar.setBarBorder(1, 1)
+PlayerStatusbar.left = 1
+PlayerStatusbar.top = 1
+PlayerStatusbar.setFlag(SpriteFlag.Ghost, true)
+PlayerStatusbar.setFlag(SpriteFlag.Invisible, true)
+PlayerStatusbar.max = 25
+PlayerStatusbar.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
+EnemyStatusbar = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
+EnemyStatusbar.setColor(12, 1, 13)
+EnemyStatusbar.setBarBorder(1, 1)
+EnemyStatusbar.right = 159
+EnemyStatusbar.top = 1
+EnemyStatusbar.setFlag(SpriteFlag.Ghost, true)
+EnemyStatusbar.setFlag(SpriteFlag.Invisible, true)
+EnemyStatusbar.max = 25
+EnemyStatusbar.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
 UpdateStats()
 BaseDisplay = sprites.create(transformSprites.scale2x(Bases[SelectedObjectBase]), SpriteKind.Text)
 CannonDisplay = sprites.create(transformSprites.scale2x(Cannons[SelectedObjectCannon]), SpriteKind.Text)
@@ -1497,7 +1543,6 @@ EnemyPropeller.image.replace(10, 14)
 EnemyPropeller.image.replace(11, 15)
 EnemyCannon.z = 50
 EnemyBase.z = 45
-EnemyBase.setFlag(SpriteFlag.StayInScreen, true)
 game.onUpdate(function () {
     if (!(EditorIsOpen)) {
         PlayerCannon.setPosition(PlayerBase.x + 6, PlayerBase.y + 8)
@@ -1520,9 +1565,9 @@ game.onUpdate(function () {
 forever(function () {
     if (!(EditorIsOpen)) {
         if (!(EnemyBase.y == PlayerBase.y)) {
-            if (EnemyBase.y > PlayerBase.y + 1) {
+            if (EnemyBase.y > PlayerBase.y + 5) {
                 EnemyBase.vy = -1 * (30 + 1.5 * GetTotalForEnemy("S"))
-            } else if (EnemyBase.y < PlayerBase.y - 1) {
+            } else if (EnemyBase.y < PlayerBase.y - 5) {
                 EnemyBase.vy = 30 + 1.5 * GetTotalForEnemy("S")
             } else {
                 EnemyBase.vy = 0
