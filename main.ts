@@ -167,7 +167,11 @@ function MakeArraysPropeller () {
     29,
     33
     ]
-    OwnedPropellers = [0]
+    if (blockSettings.exists("OwnedPropellers")) {
+        OwnedPropellers = blockSettings.readNumberArray("OwnedPropellers")
+    } else {
+        OwnedPropellers = [0]
+    }
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
@@ -261,26 +265,34 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
         UpdateStats()
     }
 })
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (EditorIsOpen) {
+        blockMenu.setColors(5, 1)
+        blockMenu.showMenu(["Cancel", "Sell Part", "Rename Ship", "Restart"], MenuStyle.List, MenuLocation.BottomRight)
+    }
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (EditorIsOpen) {
-        PlayerPropeller.setPosition(PlayerBase.x - 15, PlayerBase.y + 6)
-        PlayerCannon.setPosition(PlayerBase.x + 6, PlayerBase.y + 8)
-        EditorIsOpen = false
-        for (let value of sprites.allOfKind(SpriteKind.Text)) {
-            value.setFlag(SpriteFlag.Invisible, true)
+        if (!(blockMenu.isMenuOpen())) {
+            PlayerPropeller.setPosition(PlayerBase.x - 15, PlayerBase.y + 6)
+            PlayerCannon.setPosition(PlayerBase.x + 6, PlayerBase.y + 8)
+            EditorIsOpen = false
+            for (let value of sprites.allOfKind(SpriteKind.Text)) {
+                value.setFlag(SpriteFlag.Invisible, true)
+            }
+            PlayerCannon.image.replace(4, 0)
+            color.setPalette(
+            color.originalPalette
+            )
+            EnemyBase.setFlag(SpriteFlag.Invisible, false)
+            PlayerPropeller.setFlag(SpriteFlag.Invisible, false)
+            EnemyCannon.setFlag(SpriteFlag.Invisible, false)
+            EnemyPropeller.setFlag(SpriteFlag.Invisible, false)
+            PlayerBase.setPosition(23, 100)
+            EnemyBase.setPosition(137, 20)
+            EnemyStatusbar.setFlag(SpriteFlag.Invisible, false)
+            PlayerStatusbar.setFlag(SpriteFlag.Invisible, false)
         }
-        PlayerCannon.image.replace(4, 0)
-        color.setPalette(
-        color.originalPalette
-        )
-        EnemyBase.setFlag(SpriteFlag.Invisible, false)
-        PlayerPropeller.setFlag(SpriteFlag.Invisible, false)
-        EnemyCannon.setFlag(SpriteFlag.Invisible, false)
-        EnemyPropeller.setFlag(SpriteFlag.Invisible, false)
-        PlayerBase.setPosition(23, 100)
-        EnemyBase.setPosition(137, 20)
-        EnemyStatusbar.setFlag(SpriteFlag.Invisible, false)
-        PlayerStatusbar.setFlag(SpriteFlag.Invisible, false)
     } else {
         if (!(APressed)) {
             APressed = true
@@ -712,12 +724,70 @@ function MakeArraysBase () {
     -3,
     13
     ]
-    OwnedBases = [0]
+    if (blockSettings.exists("OwnedBases")) {
+        OwnedBases = blockSettings.readNumberArray("OwnedBases")
+    } else {
+        OwnedBases = [0]
+    }
 }
 statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
+    EditorIsOpen = true
+    if (Math.percentChance(50)) {
+        LostWonBase = "You earned a " + BaseNames1[CurrentEnemyBase] + " " + BaseNames2[CurrentEnemyBase] + " (base). "
+        OwnedBases.push(CurrentEnemyBase)
+    } else {
+        LostWonBase = ""
+    }
+    if (Math.percentChance(50)) {
+        LostWonCannon = "You earned a " + CannonNames1[CurrentEnemyCannon] + " " + cannonNames2[CurrentEnemyCannon] + " (cannon). "
+        OwnedCannons.push(CurrentEnemyCannon)
+    } else {
+        LostWonCannon = ""
+    }
+    if (Math.percentChance(50)) {
+        LostWonPropeller = "You earned a " + PropellerNames1[CurrentEnemyPropeller] + " " + PropellerNames2[CurrentEnemyPropeller] + " (propeller). "
+        OwnedPropellers.push(CurrentEnemyPropeller)
+    } else {
+        LostWonPropeller = ""
+    }
+    if ("" + LostWonBase + LostWonCannon + LostWonPropeller == "") {
+        game.showLongText("You won Nothing :(", DialogLayout.Center)
+    } else {
+        game.showLongText("" + LostWonBase + LostWonCannon + LostWonPropeller, DialogLayout.Center)
+    }
+    blockSettings.writeNumberArray("OwnedBases", OwnedBases)
+    blockSettings.writeNumberArray("OwnedCannons", OwnedCannons)
+    blockSettings.writeNumberArray("OwnedPropellers", OwnedPropellers)
     game.reset()
 })
 statusbars.onZero(StatusBarKind.Health, function (status) {
+    EditorIsOpen = true
+    if (Math.percentChance(50)) {
+        LostWonBase = "You lost your base, which was a " + BaseNames1[OwnedBases[SelectedObjectBase]] + " " + BaseNames2[OwnedBases[SelectedObjectBase]] + ". "
+        OwnedBases.removeAt(SelectedObjectBase)
+    } else {
+        LostWonBase = ""
+    }
+    if (Math.percentChance(50)) {
+        LostWonCannon = "You lost your cannon, which was a " + CannonNames1[OwnedCannons[SelectedObjectCannon]] + " " + cannonNames2[OwnedCannons[SelectedObjectCannon]] + ". "
+        OwnedCannons.removeAt(SelectedObjectCannon)
+    } else {
+        LostWonCannon = ""
+    }
+    if (Math.percentChance(50)) {
+        LostWonPropeller = "You lost your propeller, which was a " + PropellerNames1[OwnedPropellers[SelectedObjectPropeller]] + " " + PropellerNames2[OwnedPropellers[SelectedObjectPropeller]] + ". "
+        OwnedPropellers.removeAt(SelectedObjectPropeller)
+    } else {
+        LostWonPropeller = ""
+    }
+    if ("" + LostWonBase + LostWonCannon + LostWonPropeller == "") {
+        game.showLongText("You lost nothing!", DialogLayout.Center)
+    } else {
+        game.showLongText("" + LostWonBase + LostWonCannon + LostWonPropeller, DialogLayout.Center)
+    }
+    blockSettings.writeNumberArray("OwnedBases", OwnedBases)
+    blockSettings.writeNumberArray("OwnedCannons", OwnedCannons)
+    blockSettings.writeNumberArray("OwnedPropellers", OwnedPropellers)
     game.reset()
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -920,7 +990,11 @@ function MakeArraysCannon () {
     -2,
     -12
     ]
-    OwnedCannons = [0]
+    if (blockSettings.exists("OwnedCannons")) {
+        OwnedCannons = blockSettings.readNumberArray("OwnedCannons")
+    } else {
+        OwnedCannons = [0]
+    }
 }
 function UpdateStats () {
     if (CursorPosition == "B") {
@@ -1086,6 +1160,20 @@ function GetTotal (WhatToGet: string) {
         return BaseDValue[OwnedBases[SelectedObjectBase]] + (CannonDValue[OwnedCannons[SelectedObjectCannon]] + PropellerDValue[OwnedPropellers[SelectedObjectPropeller]])
     }
 }
+blockMenu.onMenuOptionSelected(function (option, index) {
+    pause(10)
+    if (option == "Cancel") {
+        blockMenu.closeMenu()
+    } else if (option == "Restart") {
+        if (!(Ask.AddQuestion("You'll lose all progress", "keep", "restart"))) {
+            blockSettings.clear()
+            game.reset()
+        }
+    } else if (option == "Rename Ship") {
+        blockSettings.remove("Name")
+        game.reset()
+    }
+})
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     if (Math.percentChance((GetTotalForEnemy("D") + GetTotal("D")) / 2)) {
     	
@@ -1112,6 +1200,9 @@ let PartAttackAmount: TextSprite = null
 let CannonSValue: number[] = []
 let CannonDValue: number[] = []
 let CannonAValue: number[] = []
+let LostWonPropeller = ""
+let LostWonCannon = ""
+let LostWonBase = ""
 let BaseSValue: number[] = []
 let BaseDValue: number[] = []
 let BaseAValue: number[] = []
@@ -1157,10 +1248,15 @@ let APressed = false
 let SubName = ""
 let EditorIsOpen = false
 EditorIsOpen = true
-color.setColor(1, color.rgb(147, 136, 233))
-SubName = game.askForString("Name you Submarine", 12)
-if (SubName.isEmpty()) {
-    SubName = "Unnamed Sub"
+if (!(blockSettings.exists("Name"))) {
+    color.setColor(1, color.rgb(147, 136, 233))
+    SubName = game.askForString("Name you Submarine", 12)
+    if (SubName.isEmpty()) {
+        SubName = "Unnamed Sub"
+    }
+    blockSettings.writeString("Name", SubName)
+} else {
+    SubName = blockSettings.readString("Name")
 }
 color.setPalette(
 color.originalPalette
@@ -1543,6 +1639,26 @@ EnemyPropeller.image.replace(10, 14)
 EnemyPropeller.image.replace(11, 15)
 EnemyCannon.z = 50
 EnemyBase.z = 45
+game.setDialogFrame(img`
+    . 6 6 6 6 6 6 6 6 6 6 6 6 6 6 
+    6 6 7 7 7 7 7 7 7 7 7 7 7 7 6 
+    6 7 7 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 5 7 6 
+    6 7 5 5 5 5 5 5 5 5 5 5 7 7 6 
+    6 7 7 7 7 7 7 7 7 7 7 7 7 6 6 
+    6 6 6 6 6 6 6 6 6 6 6 6 6 6 . 
+    `)
+game.setDialogCursor(img`
+    . 
+    `)
 game.onUpdate(function () {
     if (!(EditorIsOpen)) {
         PlayerCannon.setPosition(PlayerBase.x + 6, PlayerBase.y + 8)
